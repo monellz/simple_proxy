@@ -3,6 +3,10 @@ import requests
 import multiprocessing
 import re
 import urllib
+import encrypt
+
+
+key = b"thisisakey"
 
 def work(cnn):
   while True:
@@ -13,22 +17,25 @@ def work(cnn):
 
     if not res:
       break
-
+    
+    print(res)
+    res = encrypt.encrypt(res, key)
     rs_url = re.findall(r"GET ([\w:/\.]+)", str(res))
     if len(rs_url) == 0:
       break
-
+    print(res)
     netloc = urllib.parse.urlparse(rs_url[0]).netloc
     print("rs_url: ", rs_url)
     print("netloc: ", netloc)
     print("socket: ", cnn)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as rs:
       rs.connect((netloc, 80))
-      rs.settimeout(2)
+      rs.settimeout(3)
       rs.sendall(res)
       while True:
         try:
           data = rs.recv(1024)
+          data_encry = encrypt.encrypt(data, key)
         except socket.timeout:
           print("timeout rs_url: ", rs_url)
           break
@@ -36,7 +43,7 @@ def work(cnn):
         if not data:
           print("remote server send done")
           break
-        cnn.sendall(data)
+        cnn.sendall(data_encry)
   cnn.close()
 
 if __name__ == '__main__':

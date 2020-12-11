@@ -2,6 +2,7 @@
 
 import socket
 import time, threading
+import encrypt
 
 CLIENT_HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 CLIENT_PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
@@ -9,6 +10,8 @@ SERVER_HOST = '127.0.0.1'  #'183.173.181.79'
 SERVER_PORT = 12345
 #content = "<html>\r\n<h1>Secret(Fake)</h1>\r\n<p>You're attacked by 2017010650</p>\r\n</html>"
 #text = 'HTTP/1.1 200 OK\r\nServer: nginx/1.14.0 (Ubuntu)\r\nDate: Thu, 10 Dec 2020 19:42:56 GMT\r\nContent-Type: text/html\r\nContent-Length: ' + str(len(content)) + '\r\nLast-Modified: Sat, 14 Nov 2020 20:42:45 GMT\r\nConnection: keep-alive\r\nETag: "5fb04145-4a"\r\nAccept-Ranges: bytes\r\n\r\n' + content
+
+key = b"thisisakey"
 
 def conn(c, a):
     with c:
@@ -22,8 +25,9 @@ def conn(c, a):
                 #conn.sendall(str.encode(text))
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as ss:
                 ss.connect((SERVER_HOST, SERVER_PORT))
-                ss.settimeout(1)
-                ss.send(data)
+                ss.settimeout(3)
+                data_encry = encrypt.encrypt(data, key)
+                ss.send(data_encry)
                 while True:
                     try:
                         sdata = ss.recv(1024)
@@ -33,7 +37,8 @@ def conn(c, a):
                     if not sdata:
                         print("break2")
                         break
-                    c.sendall(sdata)
+                    sdata_decry = encrypt.encrypt(sdata, key)
+                    c.sendall(sdata_decry)
         c.close()
         return
 

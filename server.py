@@ -3,23 +3,27 @@ import requests
 import multiprocessing
 import re
 import urllib
-import encrypt
+from util import *
 
+user_data = {
+  b'username': b'password'
+}
 
-key = b"thisisakey"
+def user_available(username, password):
+  return username in user_data.keys() and user_data[username] == password
 
 def work(cnn):
   while True:
     try:
-      res = cnn.recv(1024)
+      res, username, password = recv_msg(cnn)
+      if not res:
+        break
+      if not user_available(username, password):
+        print("user not available:", username, password)
+        break
     except ConnectionResetError:
       break
 
-    if not res:
-      break
-    
-    print(res)
-    res = encrypt.encrypt(res, key)
     rs_url = re.findall(r"GET ([\w:/\.]+)", str(res))
     if len(rs_url) == 0:
       break
@@ -35,7 +39,6 @@ def work(cnn):
       while True:
         try:
           data = rs.recv(1024)
-          data_encry = encrypt.encrypt(data, key)
         except socket.timeout:
           print("timeout rs_url: ", rs_url)
           break
@@ -43,7 +46,7 @@ def work(cnn):
         if not data:
           print("remote server send done")
           break
-        cnn.sendall(data_encry)
+        send_msg(cnn, data, b'', b'')
   cnn.close()
 
 if __name__ == '__main__':

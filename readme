@@ -1,13 +1,31 @@
-加了一个简易的加密解密，文件是encrypt.py，里面的函数encrypt既能加密又能解密。
+使用方法
 
-比如说密钥是b'thisisakey'，明文是要传输的正文，比如说b'GET XXXXXX...'，他就把密钥重复数次和明文长度相同，然后把密钥和明文做异或得到密文，然后进行传输。这里加密解密的函数是一样的。
+client.py有4个参数，
 
-这个函数两个参数，第一个参数是明文/密文，第二个参数是密钥，返回值是密文/明文。
+usage: client.py [-h] [--client_host CLIENT_HOST] [--client_port CLIENT_PORT]
+                 [--server_host SERVER_HOST] [--server_port SERVER_PORT]
 
-效率很低，卡的一批。
+optional arguments:
+  -h, --help            show this help message and exit
+  --client_host CLIENT_HOST
+                        Standard loopback interface address (localhost)
+  --client_port CLIENT_PORT
+                        Port to listen on (non-privileged ports are > 1023)
+  --server_host SERVER_HOST
+                        server host
+  --server_port SERVER_PORT
+                        server port
+
+
+其中本机电脑设置http流量转发的ip地址设置为127.0.0.1（这个与--client_host参数一致），端口设置为大于1023的数（这个与--client_port一致）
+
+除此之外 client.py需设置服务端ip(--server_host)和对应端口(--server_port)
 
 
 
-encrypt放到了util里面，换了可能更快的encrypt实现
+服务器端使用server.py脚本
 
-添加了username跟password
+只有一个参数--server_port，应与client.py设置的server_port一致
+
+
+所有脚本参数都有默认值，默认本机http流量转发到127.0.0.1的65432端口，直接运行server.py（将会在127.0.0.1监听12345端口），然后运行client.py（将会在127.0.0.1监听65432端口）

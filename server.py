@@ -3,6 +3,7 @@ import requests
 import multiprocessing
 import re
 import urllib
+import argparse
 from util import *
 
 user_data = {
@@ -50,9 +51,14 @@ def work(cnn):
   cnn.close()
 
 if __name__ == '__main__':
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--server_port', type=int, default=12345, help='server port')
+
+  args = parser.parse_args()
+
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-  s.bind(('0.0.0.0', 12345))
+  s.bind(('0.0.0.0', args.server_port))
   s.listen(5)
   while True:
     try:
